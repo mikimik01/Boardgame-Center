@@ -47,22 +47,6 @@ Boardgame Center is a Cassandra-based application that provides a board game res
 │   │   ├── resources/
 │   │   │   ├── application.conf
 │   │   │   ├── logback.xml
-│   │   │
-│   ├── test/
-│   │   ├── kotlin/
-│   │   │   ├── com/
-│   │   │   │   ├── boardgameseating/
-│   │   │   │   │   ├── service/
-│   │   │   │   │   │   ├── TableAssignmentServiceTest.kt
-│   │   │   │   │   │   ├── PlayerServiceTest.kt
-│   │   │   │   │   ├── repository/
-│   │   │   │   │   │   ├── GameRepositoryTest.kt
-│   │   │   │   │   │   ├── PlayerRepositoryTest.kt
-│   │   │   │   │   │   ├── TableRepositoryTest.kt
-│   │   │   │   │   ├── controller/
-│   │   │   │   │   │   ├── GameControllerTest.kt
-│   │   │   │   │   │   ├── PlayerControllerTest.kt
-│   │   │   │   │   │   ├── TableControllerTest.kt
 │
 ├── build.gradle.kts
 ├── settings.gradle.kts
