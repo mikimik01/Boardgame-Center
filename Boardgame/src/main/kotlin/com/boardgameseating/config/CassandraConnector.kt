@@ -9,11 +9,13 @@ object CassandraConnector {
     fun connect(
         node: String = "127.0.0.1",
         port: Int = 9042,
-        datacenter: String = "datacenter1"
+        datacenter: String = "datacenter1",
+        keyspaceName: String = "boardgames"
     ) {
         session = CqlSession.builder()
             .addContactPoint(InetSocketAddress(node, port))
             .withLocalDatacenter(datacenter)
+            .withKeyspace(keyspaceName)
             .build()
     }
 

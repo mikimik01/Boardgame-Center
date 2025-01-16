@@ -1,4 +1,4 @@
-package org.example.app
+package com.boardgameseating.app
 
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
