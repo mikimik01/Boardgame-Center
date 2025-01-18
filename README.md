@@ -99,7 +99,7 @@ cd boardgame-seating
 
 ---
 
-#### **1. Create a Docker network**
+#### **2.1. Create a Docker network**
 Create a custom Docker bridge network to allow the containers to communicate.
 
 ```bash
@@ -108,7 +108,7 @@ docker network create cassandra-cluster
 
 ---
 
-#### **2. Start the first Cassandra node**
+#### **2.2. Start the first Cassandra node**
 
 Launch the first Cassandra container and assign it a name (e.g., `cassandra1`).
 
@@ -118,7 +118,7 @@ docker run -d --name cassandra1 --network cassandra-cluster cassandra:latest
 
 ---
 
-#### **3. Start additional Cassandra nodes**
+#### **2.3. Start additional Cassandra nodes**
 For each additional node, specify the `CASSANDRA_SEEDS` environment variable to point to the first node (the seed node).
 
 For example, to start the second and third nodes:
@@ -137,7 +137,7 @@ docker run -d --name cassandra3 --network cassandra-cluster \
 
 ---
 
-#### **4. Verify the cluster**
+#### **2.4. Verify the cluster**
 Once all containers are running, you can check the cluster status using the Cassandra Query Language Shell (`cqlsh`).
 
 1. Access the `cqlsh` from one of the containers:
@@ -156,7 +156,7 @@ Once all containers are running, you can check the cluster status using the Cass
 
 ---
 
-#### **5. Scaling the cluster dynamically**
+#### **2.5. Scaling the cluster dynamically**
 To dynamically scale the cluster, you can add more nodes using the same `CASSANDRA_SEEDS` configuration. Ensure you specify one or more seed nodes for the new container.
 
 ```bash
@@ -167,7 +167,7 @@ docker run -d --name cassandra4 --network cassandra-cluster \
 
 ---
 
-#### **6. Optional: Expose ports for external access**
+#### **2.6. Optional: Expose ports for external access**
 If you need to access Cassandra nodes externally, map their ports using `-p`. For example:
 
 ```bash
