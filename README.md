@@ -95,9 +95,7 @@ git clone https://github.com/your-username/boardgame-seating.git
 cd boardgame-seating
 ```
 
-####2. Start multiple Cassandra instances on local computer
-
-# Setting Up a Cassandra Cluster Locally with Docker
+### 2. Start multiple Cassandra instances on local computer
 
 ---
 
