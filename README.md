@@ -78,12 +78,39 @@ Boardgame Center is a Cassandra-based application that provides a board game res
    - Option B: **Local Installation**
       - Download and install Cassandra from [cassandra.apache.org](https://cassandra.apache.org/_/download.html).
       - Start it and create a keyspace similarly via `cqlsh`.
+     ```bash
+     systemctl start cassandra
+     cqlsh
+     notetool
+     ```
+     - Casandra na wielu węzłach, przykład konfiguracji dla:
+    ```bash
+      node0 10.10.0.101 (seed1)
+      node1 10.10.0.102
+      node2 10.10.0.103
+      node3 10.10.0.104 (seed2)
+      node4 10.10.0.105
+      node5 10.10.0.106
+    ```
+    Edytuj plik konfiguracyjny /etc/cassandra/conf/cassandra.yaml
+       ```bash
+         cluster_name: 'Test Cluster'       # default
+         num_tokens: 256                    # default
+         seed_provider:
+         - class_name: org.apache.cassandra.\\
+         locator.SimpleSeedProvider         # default
+         parameters:
+         - seeds: "10.10.0.101,10.10.0.104"
+         listen_address: 10.10.0.101        # local ip
+         rpc_address: localhost             # default
+         endpoint_snitch: SimpleSnitch      # default
+    ```
 
-2. **Java and Kotlin**
+3. **Java and Kotlin**
    - JDK 11+ is recommended.
    - [IntelliJ IDEA](https://www.jetbrains.com/idea/) or another Kotlin-compatible IDE is helpful.
 
-3. **Gradle**
+4. **Gradle**
    - This project uses Gradle (Kotlin DSL) to manage dependencies and build.
 
 ## Usage
