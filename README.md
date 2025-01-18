@@ -93,3 +93,87 @@ Boardgame Center is a Cassandra-based application that provides a board game res
 ```bash
 git clone https://github.com/your-username/boardgame-seating.git
 cd boardgame-seating
+```
+
+####2. Start multiple Cassandra instances on local computer
+
+# Setting Up a Cassandra Cluster Locally with Docker
+
+---
+
+#### **1. Create a Docker network**
+Create a custom Docker bridge network to allow the containers to communicate.
+
+```bash
+docker network create cassandra-cluster
+```
+
+---
+
+#### **2. Start the first Cassandra node**
+
+Launch the first Cassandra container and assign it a name (e.g., `cassandra1`).
+
+```bash
+docker run -d --name cassandra1 --network cassandra-cluster cassandra:latest
+```
+
+---
+
+#### **3. Start additional Cassandra nodes**
+For each additional node, specify the `CASSANDRA_SEEDS` environment variable to point to the first node (the seed node).
+
+For example, to start the second and third nodes:
+
+```bash
+docker run -d --name cassandra2 --network cassandra-cluster \
+    -e CASSANDRA_SEEDS=cassandra1 \
+    cassandra:latest
+
+
+
+docker run -d --name cassandra3 --network cassandra-cluster \
+    -e CASSANDRA_SEEDS=cassandra1 \
+    cassandra:latest
+```
+
+---
+
+#### **4. Verify the cluster**
+Once all containers are running, you can check the cluster status using the Cassandra Query Language Shell (`cqlsh`).
+
+1. Access the `cqlsh` from one of the containers:
+
+   ```bash
+   docker exec -it cassandra1 cqlsh
+   ```
+
+2. Run the following command to view the cluster status:
+
+   ```cql
+   SELECT peer, rpc_address, data_center, rack FROM system.peers;
+   ```
+
+   This should show information about the other nodes in the cluster.
+
+---
+
+#### **5. Scaling the cluster dynamically**
+To dynamically scale the cluster, you can add more nodes using the same `CASSANDRA_SEEDS` configuration. Ensure you specify one or more seed nodes for the new container.
+
+```bash
+docker run -d --name cassandra4 --network cassandra-cluster \
+    -e CASSANDRA_SEEDS=cassandra1 \
+    cassandra:latest
+```
+
+---
+
+#### **6. Optional: Expose ports for external access**
+If you need to access Cassandra nodes externally, map their ports using `-p`. For example:
+
+```bash
+docker run -d --name cassandra1 --network cassandra-cluster \
+    -p 9042:9042 \
+    cassandra:latest
+```
