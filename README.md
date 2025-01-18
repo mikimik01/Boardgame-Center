@@ -92,8 +92,8 @@ Boardgame Center is a Cassandra-based application that provides a board game res
       node4 10.10.0.105
       node5 10.10.0.106
     ```
-    Edytuj plik konfiguracyjny /etc/cassandra/conf/cassandra.yaml
-       ```bash
+    Edytuj plik konfiguracyjny /etc/cassandra/conf/cassandra.yaml:
+   ```bash
          cluster_name: 'Test Cluster'       # default
          num_tokens: 256                    # default
          seed_provider:
