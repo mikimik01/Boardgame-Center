@@ -19,8 +19,7 @@
     <select id="game" required></select><br><br>
 
     <label for="requirements">Requirements:</label>
-    <select id="requirements">
-        <option value="">None</option>
+    <select id="requirements" required>
         <option value="Experienced players only">Experienced players only</option>
         <option value="Beginner friendly">Beginner friendly</option>
         <option value="Quick game">Quick game</option>
@@ -42,7 +41,7 @@
             gameSelect.innerHTML = ""; // Clear previous options
             games.forEach(game => {
                 const option = document.createElement('option');
-                option.value = game.id;
+                option.value = game.game_id;  // FIX: Use game_id
                 option.textContent = game.name;
                 gameSelect.appendChild(option);
             });
@@ -54,7 +53,7 @@
             playerSelect.innerHTML = ""; // Clear previous options
             players.forEach(player => {
                 const option = document.createElement('option');
-                option.value = player.id;
+                option.value = player.player_id;  // FIX: Use player_id
                 option.textContent = player.name;
                 playerSelect.appendChild(option);
             });
@@ -122,13 +121,35 @@
     async function loadReservations() {
         try {
             const response = await fetch('/reservations');
-            const data = await response.json();
-            const list = document.getElementById('reservationList');
-            list.innerHTML = ''; // Clear the list
+            const reservations = await response.json();
 
-            data.forEach(reservation => {
+            // Fetch games and players to map IDs to names
+            const gamesResponse = await fetch('/games');
+            const games = await gamesResponse.json();
+            const playersResponse = await fetch('/players');
+            const players = await playersResponse.json();
+
+            // Create lookup maps for quick access
+            const gameMap = {};
+            games.forEach(game => {
+                gameMap[game.game_id] = game.name; // ✅ Map game_id to game name
+            });
+
+            const playerMap = {};
+            players.forEach(player => {
+                playerMap[player.player_id] = player.name; // ✅ Map player_id to player name
+            });
+
+            const list = document.getElementById('reservationList');
+            list.innerHTML = ''; // Clear the list before adding new items
+
+            reservations.forEach(reservation => {
                 const li = document.createElement('li');
-                li.textContent = `${reservation.time} for ${reservation.game} by ${reservation.player} (Requirements: ${reservation.requirements || 'None'})`;
+
+                const gameName = gameMap[reservation.game_id] || "Unknown Game";
+                const playerName = playerMap[reservation.player_id] || "Unknown Player";
+
+                li.textContent = `${reservation.time} for ${gameName} by ${playerName} (Requirements: ${reservation.requirements || 'None'})`;
 
                 // Add a "Delete" button for each reservation
                 const deleteButton = document.createElement('button');
@@ -140,7 +161,7 @@
             });
 
         } catch (error) {
-            console.error("Error loading reservations:", error);
+            console.error("❌ Error loading reservations:", error);
         }
     }
 

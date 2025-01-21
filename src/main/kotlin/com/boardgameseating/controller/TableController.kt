@@ -5,6 +5,8 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.request.*
 import com.boardgameseating.config.CassandraConnector
+import com.boardgameseating.model.Game
+import com.boardgameseating.model.Player
 import com.boardgameseating.repository.TableRepository
 import com.boardgameseating.repository.PlayerRepository
 import com.boardgameseating.repository.GameRepository
@@ -41,19 +43,38 @@ fun Route.tableRoutes() {
          * na podstawie preferencji i listy dostępnych gier.
          */
         post("/assign") {
-            val players = playerRepo.findAll()
-            val games = gameRepo.findAll()
+            val players: List<Map<String, String>> = playerRepo.findAll()
+            val games: List<Map<String, String>> = gameRepo.findAll()
+
+            // Convert List<Map<String, String>> to List<Player>
+            val mappedPlayers: List<Player> = players.map { playerMap ->
+                Player(
+                    playerId = playerMap["player_id"]!!,  // Ensure it exists
+                    name = playerMap["name"]!!,
+                    age = playerMap["age"]!!.toInt(),  // Convert string to int
+                    preferences = playerMap["preferences"] ?: "None"  // Handle null case
+                )
+            }
+
+            // ✅ Fixing the Game Conversion
+            val mappedGames: List<Game> = games.map { gameMap ->
+                Game(
+                    gameId = gameMap["game_id"]!!,  // Ensure it exists
+                    name = gameMap["name"]!!,
+                    genre = gameMap["genre"] ?: "Unknown"  // Fix: Use the correct field name
+                )
+            }
 
             val service = TableAssignmentService()
-            val generatedTables = service.assignPlayersToTables(players, games)
+            val generatedTables: List<Table> = service.assignPlayersToTables(mappedPlayers, mappedGames)
 
-            // Zapisujemy wygenerowane stoły do bazy
-            generatedTables.forEach {
-                tableRepo.addTable(it)
-            }
+            // Save tables to DB
+            generatedTables.forEach { tableRepo.addTable(it) }
 
             call.respond(generatedTables)
         }
+
+
 
         /**
          * Przykładowe dodanie konkretnego stołu ręcznie

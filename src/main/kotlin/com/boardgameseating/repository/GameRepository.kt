@@ -44,14 +44,15 @@ class GameRepository(private val session: CqlSession) {
         }
     }
 
-    fun findAll(): List<Game> {
+    fun findAll(): List<Map<String, String>> {
         return try {
-            val result = session.execute("SELECT * FROM games")
+            val result = session.execute("SELECT id, name, description, max_players FROM games")
             result.map {
-                Game(
-                    it.getUuid("game_id").toString(),  // Convert UUID to String
-                    it.getString("name")!!,
-                    it.getString("genre")!!
+                mapOf(
+                    "game_id" to it.getUuid("id").toString(),  // Change `id` to `game_id`
+                    "name" to it.getString("name")!!,
+                    "description" to it.getString("description")!!,
+                    "max_players" to it.getInt("max_players").toString()
                 )
             }.toList()
         } catch (e: Exception) {

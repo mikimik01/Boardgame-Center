@@ -1,11 +1,14 @@
 package com.boardgameseating.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.util.UUID
 
 @Serializable
 data class Reservation(
-    val id: String? = null,       // ID generowane na backendzie
-    val time: String,             // Czas jako String
-    val game: String,             // Gra
-    val requirements: String? = null // Opcjonalne wymagania
+    @SerialName("id") val id: String = UUID.randomUUID().toString(),
+    @SerialName("time") val time: String,
+    @SerialName("playerId") val playerId: String,
+    @SerialName("gameId") val gameId: String,
+    @SerialName("requirements") val requirements: String? = null
 )

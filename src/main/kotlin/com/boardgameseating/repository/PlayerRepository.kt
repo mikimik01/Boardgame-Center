@@ -39,26 +39,23 @@ class PlayerRepository(private val session: CqlSession) {
         }
     }
 
-    fun findAll(): List<Player> {
+    fun findAll(): List<Map<String, String>> {
         return try {
-            val result = session.execute("SELECT * FROM players")
-            val players = result.map {
-                Player(
-                    it.getUuid("player_id").toString(),  // Convert UUID to String
-                    it.getString("name")!!,
-                    it.getInt("age"),
-                    it.getString("preferences")!!  // Nullable in case of null values
+            val result = session.execute("SELECT id, name, age, preferences FROM players")
+            result.map {
+                mapOf(
+                    "player_id" to it.getUuid("id").toString(),
+                    "name" to it.getString("name")!!,
+                    "age" to it.getInt("age").toString(),
+                    "preferences" to (it.getString("preferences") ?: "None")  // FIXED
                 )
             }.toList()
-            if (players.isEmpty()) {
-                println("ℹ️ No players found.")
-            }
-            players
         } catch (e: Exception) {
             println("❌ Error fetching players: ${e.message}")
             emptyList()
         }
     }
+
 
     fun findById(playerId: String): Player? {
         return try {

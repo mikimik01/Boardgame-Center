@@ -11,9 +11,10 @@ class ReservationRepository(private val session: CqlSession) {
         val statement = SimpleStatement.newInstance(
             """
             CREATE TABLE IF NOT EXISTS reservations (
-                id UUID PRIMARY KEY,  -- Change to UUID for uniqueness
+                id UUID PRIMARY KEY,  
                 time TEXT,
-                game TEXT,
+                player_id UUID,   -- ✅ Added player_id
+                game_id UUID,     -- ✅ Added game_id
                 requirements TEXT
             )
             """.trimIndent()
@@ -24,10 +25,11 @@ class ReservationRepository(private val session: CqlSession) {
     fun addReservation(reservation: Reservation): Boolean {
         return try {
             val statement = SimpleStatement.newInstance(
-                "INSERT INTO reservations (id, time, game, requirements) VALUES (?, ?, ?, ?)",
-                UUID.fromString(reservation.id),  // Convert id to UUID
+                "INSERT INTO reservations (id, time, player_id, game_id, requirements) VALUES (?, ?, ?, ?, ?)",
+                UUID.fromString(reservation.id),
                 reservation.time,
-                reservation.game,
+                UUID.fromString(reservation.playerId),  // ✅ Store player_id correctly
+                UUID.fromString(reservation.gameId),    // ✅ Store game_id correctly
                 reservation.requirements
             )
             session.execute(statement)
@@ -39,23 +41,20 @@ class ReservationRepository(private val session: CqlSession) {
         }
     }
 
-    fun findAll(): List<Reservation> {
+    fun findAll(): List<Map<String, String>> {
         return try {
-            val result = session.execute("SELECT * FROM reservations")
-            val reservations = result.map {
-                Reservation(
-                    it.getUuid("id").toString(),  // Convert UUID to String
-                    it.getString("time")!!,
-                    it.getString("game")!!,
-                    it.getString("requirements")
+            val result = session.execute("SELECT id, time, player_id, game_id, requirements FROM reservations")
+            result.map {
+                mapOf(
+                    "id" to it.getUuid("id").toString(),
+                    "time" to it.getString("time")!!,
+                    "player_id" to it.getUuid("player_id").toString(),  // ✅ Now correctly retrieving player_id
+                    "game_id" to it.getUuid("game_id").toString(),      // ✅ Now correctly retrieving game_id
+                    "requirements" to (it.getString("requirements") ?: "None")
                 )
             }.toList()
-            if (reservations.isEmpty()) {
-                println("ℹ️ No reservations found.")
-            }
-            reservations
         } catch (e: Exception) {
-            println("❌ Error fetching reservations: ${e.message}")
+            println("ℹ️ No reservations found.")
             emptyList()
         }
     }
@@ -64,13 +63,14 @@ class ReservationRepository(private val session: CqlSession) {
         return try {
             val statement = SimpleStatement.newInstance(
                 "SELECT * FROM reservations WHERE id = ?",
-                UUID.fromString(id)  // Convert id to UUID
+                UUID.fromString(id)
             )
             val row = session.execute(statement).one() ?: return null
             Reservation(
                 row.getUuid("id").toString(),
                 row.getString("time")!!,
-                row.getString("game")!!,
+                row.getUuid("player_id").toString(),  // ✅ Retrieve player_id correctly
+                row.getUuid("game_id").toString(),    // ✅ Retrieve game_id correctly
                 row.getString("requirements")
             )
         } catch (e: Exception) {
@@ -83,7 +83,7 @@ class ReservationRepository(private val session: CqlSession) {
         return try {
             val statement = SimpleStatement.newInstance(
                 "DELETE FROM reservations WHERE id = ?",
-                UUID.fromString(id)  // Convert id to UUID
+                UUID.fromString(id)
             )
             session.execute(statement)
             println("🗑️ Reservation with ID '$id' deleted.")

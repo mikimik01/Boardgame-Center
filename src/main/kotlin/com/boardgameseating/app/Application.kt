@@ -11,12 +11,15 @@ import com.boardgameseating.controller.reservationRoutes
 import com.boardgameseating.controller.tableRoutes
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.http.content.*
+import kotlinx.serialization.json.Json
 
 object ApplicationConfig {
     fun Application.module() {
         install(ContentNegotiation) {
             jackson()
-            json()
+            json(Json {
+                ignoreUnknownKeys = true
+            })
         }
 
         routing {
