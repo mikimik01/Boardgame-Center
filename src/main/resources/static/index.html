@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boardgame Reservation</title>
+</head>
+<body>
+
+<h2>Make a Boardgame Reservation</h2>
+<form id="reservationForm">
+    <label for="time">Time:</label>
+    <input type="datetime-local" id="time" required><br><br>
+
+    <label for="player">Player:</label>
+    <select id="player" required></select><br><br>
+
+    <label for="game">Boardgame:</label>
+    <select id="game" required></select><br><br>
+
+    <label for="requirements">Requirements:</label>
+    <select id="requirements">
+        <option value="">None</option>
+        <option value="Experienced players only">Experienced players only</option>
+        <option value="Beginner friendly">Beginner friendly</option>
+        <option value="Quick game">Quick game</option>
+    </select><br><br>
+
+    <button type="submit">Submit Reservation</button>
+</form>
+
+<h2>Existing Reservations</h2>
+<ul id="reservationList"></ul>
+
+<script>
+    async function loadGamesAndPlayers() {
+        try {
+            // Load available games from backend
+            const gameResponse = await fetch('/games');
+            const games = await gameResponse.json();
+            const gameSelect = document.getElementById('game');
+            gameSelect.innerHTML = ""; // Clear previous options
+            games.forEach(game => {
+                const option = document.createElement('option');
+                option.value = game.id;
+                option.textContent = game.name;
+                gameSelect.appendChild(option);
+            });
+
+            // Load registered players from backend
+            const playerResponse = await fetch('/players');
+            const players = await playerResponse.json();
+            const playerSelect = document.getElementById('player');
+            playerSelect.innerHTML = ""; // Clear previous options
+            players.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player.id;
+                option.textContent = player.name;
+                playerSelect.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error("❌ Error loading games or players:", error);
+        }
+    }
+
+    document.getElementById('reservationForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const submitButton = event.target.querySelector("button");
+        submitButton.disabled = true; // Disable button while processing
+
+        const time = document.getElementById('time').value;
+        const playerId = document.getElementById('player').value;
+        const gameId = document.getElementById('game').value;
+        const requirements = document.getElementById('requirements').value || null;
+
+        const jsonData = JSON.stringify({ time, playerId, gameId, requirements });
+
+        console.log("📤 Sending JSON:", jsonData);
+
+        try {
+            const response = await fetch('/reservations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: jsonData
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText);
+            }
+
+            const data = await response.json();
+            console.log("✅ Reservation added:", data);
+            alert('Reservation created successfully!');
+            loadReservations();
+            event.target.reset(); // Clear form after submission
+
+        } catch (error) {
+            console.error("❌ Error:", error);
+            alert("Failed to create reservation: " + error.message);
+        } finally {
+            submitButton.disabled = false; // Re-enable button
+        }
+    });
+
+    async function deleteReservation(id) {
+        try {
+            const response = await fetch(`/reservations/${id}`, { method: 'DELETE' });
+
+            if (response.ok) {
+                alert('Reservation deleted successfully!');
+                loadReservations();
+            } else {
+                alert('Failed to delete reservation');
+            }
+        } catch (error) {
+            console.error("Error deleting reservation:", error);
+        }
+    }
+
+    async function loadReservations() {
+        try {
+            const response = await fetch('/reservations');
+            const data = await response.json();
+            const list = document.getElementById('reservationList');
+            list.innerHTML = ''; // Clear the list
+
+            data.forEach(reservation => {
+                const li = document.createElement('li');
+                li.textContent = `${reservation.time} for ${reservation.game} by ${reservation.player} (Requirements: ${reservation.requirements || 'None'})`;
+
+                // Add a "Delete" button for each reservation
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => deleteReservation(reservation.id);
+
+                li.appendChild(deleteButton);
+                list.appendChild(li);
+            });
+
+        } catch (error) {
+            console.error("Error loading reservations:", error);
+        }
+    }
+
+    // Load games, players, and reservations on page load
+    loadGamesAndPlayers();
+    loadReservations();
+</script>
+
+</body>
+</html>
