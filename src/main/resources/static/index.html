@@ -9,8 +9,8 @@
 
 <h2>Make a Boardgame Reservation</h2>
 <form id="reservationForm">
-    <label for="time">Time:</label>
-    <input type="datetime-local" id="time" required><br><br>
+    <label for="time">Date:</label>
+    <input type="date" id="time" required><br><br>
 
     <label for="player">Player:</label>
     <select id="player" required></select><br><br>
@@ -91,7 +91,7 @@
 
             const data = await response.json();
             console.log("✅ Reservation added:", data);
-            alert('Reservation created successfully!');
+            //alert('Reservation created successfully!');
             loadReservations();
             event.target.reset(); // Clear form after submission
 
@@ -132,12 +132,12 @@
             // Create lookup maps for quick access
             const gameMap = {};
             games.forEach(game => {
-                gameMap[game.game_id] = game.name; // ✅ Map game_id to game name
+                gameMap[game.game_id] = game.name;
             });
 
             const playerMap = {};
             players.forEach(player => {
-                playerMap[player.player_id] = player.name; // ✅ Map player_id to player name
+                playerMap[player.player_id] = player.name;
             });
 
             const list = document.getElementById('reservationList');

@@ -8,7 +8,6 @@ import io.ktor.serialization.jackson.*
 import com.boardgameseating.controller.gameRoutes
 import com.boardgameseating.controller.playerRoutes
 import com.boardgameseating.controller.reservationRoutes
-import com.boardgameseating.controller.tableRoutes
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.http.content.*
 import kotlinx.serialization.json.Json
@@ -31,7 +30,6 @@ object ApplicationConfig {
             staticResources("/", "static")
             gameRoutes()
             playerRoutes()
-            tableRoutes()
             reservationRoutes()
         }
     }
